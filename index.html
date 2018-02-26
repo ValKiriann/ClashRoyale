@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		body {
+			margin: 0;
+		}
+		.container{
+			width: 80vw;
+			margin: 0 auto;
+			opacity:0;
+			transition: all 2s;
+		}
+		.deck {
+			display: -webkit-box;
+			display: -ms-flexbox;
+			display: flex;
+			-ms-flex-wrap:wrap;
+			flex-wrap:wrap;
+    		margin:50px auto 30px;
+		    -ms-flex-pack: distribute;
+		    justify-content: space-around;
+		    -ms-flex-line-pack: distribute;
+		    align-content: space-around;
+		    -ms-flex-align: center;
+		    -webkit-box-align: center;
+		    align-items: center;
+		    -webkit-transition: all .5s;
+		    -o-transition: all .5s;
+		    transition: all .5s;
+		}
+		.card {
+			width: calc(100% * (1/4) - 10px - 1px);
+			margin: 5px auto;
+		}
+		nav {
+			width: 100vw;
+			margin: 0 auto;
+			background-color:#2E4C60; 
+		}
+		nav img {
+			max-width: 30%;
+			margin: 0 auto;
+			display: block;
+		}
+		/*
+		#loading {
+			width: 100%;
+			height: 100%;
+			background-color: red;
+			z-index: 300;
+			display: block;
+			transition: all .5s;
+		}
+		*/
+		.btn {
+			margin: 0 auto;
+			display: block;
+			font-family: sans-serif;
+			text-transform: uppercase;
+			padding: 10px 20px;
+			background-color: transparent;
+			box-shadow: none;
+			color: #2E4C60;
+			font-weight: 500;
+			border-color: #2E4C60;
+			cursor: pointer;
+		}
+		.btn:hover{
+			background-color: #2E4C60;
+			color:white;
+		}
+		#elixir {
+			color:#FD29FC;
+		}
+	</style>
+</head>
+<body>
+<nav>
+	<img src="img/clashroyale_logo.png">
+</nav>
+<main class="container" id="containerDeck">
+	<!--<div id="loading"></div>-->
+	<div class="deck" id="deck">
+		<img src="" class="card">
+		<img src="" class="card">
+		<img src="" class="card">
+		<img src="" class="card">
+		<img src="" class="card">
+		<img src="" class="card">
+		<img src="" class="card">
+		<img src="" class="card">
+	</div>
+	<img src="img/elixirdrop.png"><p id="elixir"></p>
+	<button id="generate" class="btn">Generar mazo aleatorio</button>
+</main>
+</body>
+<script type="text/javascript">
+var urlRandDeck = "http://www.clashapi.xyz/api/random-deck";
+
+function peticionAjax(url, callback) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.addEventListener("progress", function() {
+		document.getElementById('containerDeck').setAttribute("style","opacity:0");
+    }, false);
+
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+            var datos = JSON.parse(xmlHttp.responseText);
+            callback(datos);
+        } else if (xmlHttp.readyState === 4 && xmlHttp.status === 404) {
+            console.error("ERROR! 404");
+            console.info(JSON.parse(xmlHttp.responseText));
+        }
+    };
+    xmlHttp.open("GET", url, true);
+    xmlHttp.send();
+}
+peticionAjax(urlRandDeck, generateDeck);
+
+function generateDeck(datos){
+	console.info(datos);
+	var deck = document.getElementById('deck');
+	var elixirCount = 0;
+	for(i=0;i<datos.length;i++){
+		var card = datos[i];
+        var cardCover = document.getElementsByClassName("card");
+        cardCover[i].src = "http://www.clashapi.xyz/images/cards/" + card.idName + ".png";
+        elixirCount = elixirCount + card.elixirCost;
+	}
+	document.getElementById('containerDeck').setAttribute("style","opacity:1");
+	var elixirP = document.getElementById("elixir");
+	elixirCount = elixirCount/8;
+	elixirP.innerText = Math.round(elixirCount * 10) / 10;
+	 
+}
+
+var randomButton = document.getElementById('generate');
+console.info(randomButton);
+randomButton.addEventListener('click', function(){
+	peticionAjax(urlRandDeck,generateDeck)
+});
+</script>
+</html>
